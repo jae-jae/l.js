@@ -26,6 +26,7 @@ but don't insert the js file link into the document header.
 ```html
 <script src="l.js">
 	ljs.load('myLib.js',function(){ /* your callback here */});
+	ljs.exec('myLib.js',function(){ /* your callback here */});
 </script>
 ```
 
@@ -36,6 +37,11 @@ but don't insert the js file link into the document header.
 		.load('myLib.js')
 		.load('myRequiredLib.js','myDependentLib.js',function(){ /* your callback here */})
 	;
+	
+	ljs
+    		.load('myLib.js')
+    		.exec('myRequiredLib.js','myDependentLib.js',function(){ /* your callback here */})
+    	;
 </script>
 ```
 second load will be executed in parallel of first load but myDependentLib.js won't load before myRequireLib.js is loaded
