@@ -1,5 +1,12 @@
 # l.js is another simple/tiny javascript/css loader
 
+> Modify by Jaeger <JaegerCode@gmail.com>
+
+## Modify log
+- `2016-09-19`:Add `exec` and `execJs` function;
+In order to load the js file and execute js script, 
+but don't insert the js file link into the document header. 
+
 ## features
 - parallel script / css loading
 - callback after script loading (css support callback too but are executed imediately)

@@ -60,6 +60,17 @@
 				header.appendChild(e);
 				// return e; // unused at this time so drop it
 			}
+			,ajaxExec = function (url,success,error) {
+				fetch(url).then(function(response){
+					response.text().then(function(data){
+						eval.call(window,data);
+						success();
+					});
+
+				}).catch(function () {
+					error && error();
+				});
+			}
 			,load = function(url,cb){
 				if( this.aliases && this.aliases[url] ){
 					var args = this.aliases[url].slice(0);
@@ -78,6 +89,25 @@
 					return this.loadcss(url,cb);
 				}
 				return this.loadjs(url,cb);
+			}
+			,exec = function(url,cb){
+				if( this.aliases && this.aliases[url] ){
+					var args = this.aliases[url].slice(0);
+					isA(args) || (args=[args]);
+					cb && args.push(cb);
+					return this.exec.apply(this,args);
+				}
+				if( isA(url) ){ // parallelized request
+					for( var l=url[length]; l--;){
+						this.exec(url[l]);
+					}
+					cb && url.push(cb); // relaunch the dependancie queue
+					return this.exec.apply(this,url);
+				}
+				if( url.match(/\.css\b/) ){
+					return this.loadcss(url,cb);
+				}
+				return this.execJs(url,cb);
 			}
 			,loaded = {}  // will handle already loaded urls
 			,loader  = {
@@ -106,6 +136,35 @@
 					}},cb);
 					return this;
 				}
+				,execJs:function(url,cb){
+					var parts = urlParse(url);
+					url = parts.u;
+					if( loaded[url] === true ){ // already loaded exec cb if any
+						cb && cb();
+						return this;
+					}else if( loaded[url]!== undefined ){ // already asked for loading we append callback if any else return
+						if( cb ){
+							loaded[url] = (function(ocb,cb){ return function(){ ocb && ocb(); cb && cb(); }; })(loaded[url],cb);
+						}
+						return this;
+					}
+					// first time we ask this script
+					loaded[url] = (function(cb){ return function(){loaded[url]=true; cb && cb();};})(cb);
+					cb = function(){ loaded[url](); };
+					/*appendElmt('script',{type:'text/javascript',src:url,id:parts.i,onerror:function(error){
+						if( parts.f ){
+							var c = error.currentTarget;
+							c.parentNode.removeChild(c);
+							appendElmt('script',{type:'text/javascript',src:parts.f,id:parts.i},cb);
+						}
+					}},cb);*/
+					ajaxExec(url,cb,function(){
+						if( parts.f ){
+							ajaxExec(parts.f,cb);
+						}
+					});
+					return this;
+				}
 				,loadcss: function(url,cb){
 					var parts = urlParse(url);
 					url = parts.u;
@@ -121,6 +180,15 @@
 						return this;
 					}
 					load.call(this,argv[0], argc <= 1 ? undefined : function(){ loader.load.apply(loader,[].slice.call(argv,1));} );
+					return this;
+				}
+				,exec:function(){
+					var argv=arguments,argc = argv[length];
+					if( argc === 1 && isA(argv[0],Function) ){
+						argv[0]();
+						return this;
+					}
+					exec.call(this,argv[0], argc <= 1 ? undefined : function(){ loader.exec.apply(loader,[].slice.call(argv,1));} );
 					return this;
 				}
 				,addAliases:function(aliases){
