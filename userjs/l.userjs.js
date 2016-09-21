@@ -1,4 +1,4 @@
-//https://github.com/malko/l.js
+//https://github.com/jae-jae/l.js
 ;(function(window, undefined){
 /*
 * script for js/css parallel loading with dependancies management
