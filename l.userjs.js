@@ -66,8 +66,8 @@
 					method: "GET",
 					url:url,
 					onload:function(res){
-						// eval.call(window,res.responseText);
-						eval(res.responseText);
+						 eval.call(window,res.responseText);
+						// eval(res.responseText);
 						success();
 					},
 					onerror:function(){
