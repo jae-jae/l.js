@@ -1,5 +1,5 @@
 //https://github.com/malko/l.js
-;(function(window, undefined){
+;(function(window, global, undefined){
 /*
 * script for js/css parallel loading with dependancies management
 * @author Jonathan Gotti < jgotti at jgotti dot net >
@@ -66,8 +66,8 @@
 					method: "GET",
 					url:url,
 					onload:function(res){
-						 //eval.call(window,res.responseText);
-						 eval(res.responseText);
+						 eval.call(global,res.responseText);
+						 //eval(res.responseText);
 						success();
 					},
 					onerror:function(){
@@ -220,4 +220,4 @@
 	}
 	// eval script tag content if needed
 	scriptTag.src && script && appendElmt('script', {innerHTML: script});
-})(window);
+})(window,this);
